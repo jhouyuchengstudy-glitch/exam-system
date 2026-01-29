@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上考題系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="password"],
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .result-card.fail {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .score {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .wrong-answer {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .correct-answer {
+            color: #28a745;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .explanation {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            color: #004085;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 5px solid #17a2b8;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 5px solid #ffc107;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .help-text {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 5px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-box strong {
+            color: #0c5460;
+        }
+
+        .api-key-toggle {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .api-key-toggle:hover {
+            color: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 線上考題系統</h1>
+            <p>連接 Google Sheets 的智慧出題平台</p>
+        </div>
+
+        <div class="content">
+            <!-- 設定頁面 -->
+            <div id="setupPage">
+                <div class="info-box">
+                    <strong>💡 系統特色：</strong><br>
+                    ✓ 支援多科目混合出題<br>
+                    ✓ 是非題、選擇題、複選題<br>
+                    ✓ 自動批改與錯題分析<br>
+                    ✓ 私密題庫保護
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📊 題庫設定</div>
+                    
+                    <div class="input-group">
+                        <label for="spreadsheetId">Google Sheets ID *</label>
+                        <input type="text" id="spreadsheetId" 
+                               placeholder="請輸入試算表 ID（網址中的那串文字）"
+                               value="1VUg9_0-z3gO7V7oft7k9bBW01WjLu0i78ginS1aUsog">
+                        <div class="help-text">
+                            從試算表網址中複製：https://docs.google.com/spreadsheets/d/<strong>試算表ID</strong>/edit
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="apiKeySection">
+                        <label for="apiKey">Google Sheets API 金鑰（私密題庫必填）</label>
+                        <input type="password" id="apiKey" 
+                               placeholder="請輸入 API 金鑰">
+                        <div class="help-text">
+                            如果試算表非公開，需要提供 API 金鑰。
+                            <span class="api-key-toggle" onclick="toggleApiKeyHelp()">如何取得？</span>
+                        </div>
+                        <div id="apiKeyHelp" class="hidden" style="margin-top: 10px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                            <strong>取得 Google Sheets API 金鑰步驟：</strong><br>
+                            1. 前往 <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a><br>
+                            2. 建立新專案或選擇現有專案<br>
+                            3. 啟用「Google Sheets API」<br>
+                            4. 建立憑證 → API 金鑰<br>
+                            5. 複製金鑰並貼上此處
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📚 選擇科目</div>
+                    <div class="checkbox-group" id="subjectCheckboxes">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject-math" value="數學" checked>
+                            <label for="subject-math">數學</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject-english" value="英文" checked>
+                            <label for="subject-english">英文</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject-science" value="自然" checked>
+                            <label for="subject-science">自然</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🎯 題目數量</div>
+                    <div class="input-group">
+                        <input type="number" id="questionCount" min="1" max="50" value="10" placeholder="請輸入題數（1-50）">
+                        <div class="help-text">建議 5-15 題為一次測驗</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="startExam()">開始測驗</button>
+            </div>
+
+            <!-- 考試頁面 -->
+            <div id="examPage" class="hidden">
+                <div id="examQuestions"></div>
+                <button class="btn btn-primary" onclick="submitExam()">提交答案</button>
+                <button class="btn btn-secondary" onclick="backToSetup()">返回設定</button>
+            </div>
+
+            <!-- 結果頁面 -->
+            <div id="resultPage" class="hidden">
+                <div id="resultContent"></div>
+                <button class="btn btn-primary" onclick="backToSetup()">重新測驗</button>
+            </div>
+
+            <!-- 載入中 -->
+            <div id="loadingPage" class="hidden">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在載入題目...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全域變數
+        let currentQuestions = [];
+        let userAnswers = {};
+
+        // API 金鑰說明切換
+        function toggleApiKeyHelp() {
+            const helpDiv = document.getElementById('apiKeyHelp');
+            helpDiv.classList.toggle('hidden');
+        }
+
+        // 從 Google Sheets 讀取資料
+        async function fetchSheetData(spreadsheetId, sheetName, apiKey = '') {
+            try {
+                const encodedSheetName = encodeURIComponent(sheetName);
+                const range = `${encodedSheetName}!A2:H1000`;
+                
+                let url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
+                
+                if (apiKey) {
+                    url += `?key=${apiKey}`;
+                } else {
+                    // 公開試算表不需要 API key，但需要正確的分享設定
+                    url += `?key=AIzaSyDummyKeyForPublicAccess`; // 這會被 CORS 政策處理
+                }
+
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        throw new Error('權限不足：請確認試算表已設為「知道連結的任何人都可以查看」，或提供有效的 API 金鑰');
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                return data.values || [];
+            } catch (error) {
+                console.error('讀取資料錯誤:', error);
+                throw error;
+            }
+        }
+
+        // 解析題目資料
+        function parseQuestions(rows, subject) {
+            const questions = [];
+            
+            for (const row of rows) {
+                if (row.length < 7) continue; // 確保有足夠的欄位
+                
+                const question = {
+                    subject: subject,
+                    type: row[0],
+                    question: row[1],
+                    optionA: row[2] || '',
+                    optionB: row[3] || '',
+                    optionC: row[4] || '',
+                    optionD: row[5] || '',
+                    answer: row[6],
+                    explanation: row[7] || ''
+                };
+                
+                // 驗證必要欄位
+                if (question.type && question.question && question.answer) {
+                    questions.push(question);
+                }
+            }
+            
+            return questions;
+        }
+
+        // 隨機抽題
+        function getRandomQuestions(allQuestions, count) {
+            const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, Math.min(count, allQuestions.length));
+        }
+
+        // 開始測驗
+        async function startExam() {
+            // 顯示載入畫面
+            showPage('loadingPage');
+
+            try {
+                // 取得設定
+                const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
+                const questionCount = parseInt(document.getElementById('questionCount').value);
+
+                if (!spreadsheetId) {
+                    throw new Error('請輸入 Google Sheets ID');
+                }
+
+                if (questionCount < 1 || questionCount > 50) {
+                    throw new Error('題數必須在 1-50 之間');
+                }
+
+                // 取得選中的科目
+                const selectedSubjects = [];
+                const checkboxes = document.querySelectorAll('#subjectCheckboxes input[type="checkbox"]:checked');
+                checkboxes.forEach(cb => selectedSubjects.push(cb.value));
+
+                if (selectedSubjects.length === 0) {
+                    throw new Error('請至少選擇一個科目');
+                }
+
+                // 讀取所有科目的題目
+                let allQuestions = [];
+                for (const subject of selectedSubjects) {
+                    try {
+                        const rows = await fetchSheetData(spreadsheetId, subject, apiKey);
+                        const questions = parseQuestions(rows, subject);
+                        allQuestions = allQuestions.concat(questions);
+                    } catch (error) {
+                        console.error(`讀取 ${subject} 科目失敗:`, error);
+                        // 繼續處理其他科目
+                    }
+                }
+
+                if (allQuestions.length === 0) {
+                    throw new Error('未能載入任何題目，請檢查試算表設定和權限');
+                }
+
+                // 隨機抽題
+                currentQuestions = getRandomQuestions(allQuestions, questionCount);
+                userAnswers = {};
+
+                // 顯示題目
+                renderQuestions();
+                showPage('examPage');
+
+            } catch (error) {
+                alert('發生錯誤：' + error.message);
+                showPage('setupPage');
+            }
+        }
+
+        // 渲染題目
+        function renderQuestions() {
+            const container = document.getElementById('examQuestions');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+
+                let optionsHtml = '';
+                const inputType = q.type === '複選題' ? 'checkbox' : 'radio';
+                const inputName = `question-${index}`;
+
+                if (q.type === '是非題') {
+                    optionsHtml = `
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="${inputName}" value="是" onchange="saveAnswer(${index}, '是')">
+                                是（正確）
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="${inputName}" value="否" onchange="saveAnswer(${index}, '否')">
+                                否（錯誤）
+                            </label>
+                        </div>
+                    `;
+                } else {
+                    const options = [];
+                    if (q.optionA) options.push({ label: 'A', text: q.optionA });
+                    if (q.optionB) options.push({ label: 'B', text: q.optionB });
+                    if (q.optionC) options.push({ label: 'C', text: q.optionC });
+                    if (q.optionD) options.push({ label: 'D', text: q.optionD });
+
+                    optionsHtml = '<div class="options">';
+                    options.forEach(opt => {
+                        optionsHtml += `
+                            <label class="option">
+                                <input type="${inputType}" name="${inputName}" value="${opt.label}" 
+                                       onchange="saveAnswer(${index}, '${opt.label}', ${inputType === 'checkbox'})">
+                                ${opt.label}. ${opt.text}
+                            </label>
+                        `;
+                    });
+                    optionsHtml += '</div>';
+                }
+
+                card.innerHTML = `
+                    <div class="question-number">第 ${index + 1} 題 [${q.subject}] - ${q.type}</div>
+                    <div class="question-text">${q.question}</div>
+                    ${optionsHtml}
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // 儲存答案
+        function saveAnswer(questionIndex, answer, isMultiple = false) {
+            if (isMultiple) {
+                if (!userAnswers[questionIndex]) {
+                    userAnswers[questionIndex] = [];
+                }
+                const answerArray = userAnswers[questionIndex];
+                const answerIndex = answerArray.indexOf(answer);
+                
+                if (answerIndex > -1) {
+                    answerArray.splice(answerIndex, 1);
+                } else {
+                    answerArray.push(answer);
+                }
+                answerArray.sort();
+            } else {
+                userAnswers[questionIndex] = answer;
+            }
+        }
+
+        // 提交答案
+        function submitExam() {
+            // 檢查是否所有題目都已作答
+            const unanswered = [];
+            for (let i = 0; i < currentQuestions.length; i++) {
+                if (!userAnswers[i] || (Array.isArray(userAnswers[i]) && userAnswers[i].length === 0)) {
+                    unanswered.push(i + 1);
+                }
+            }
+
+            if (unanswered.length > 0) {
+                if (!confirm(`還有 ${unanswered.length} 題未作答（第 ${unanswered.join(', ')} 題），確定要提交嗎？`)) {
+                    return;
+                }
+            }
+
+            // 計算成績
+            let correctCount = 0;
+            const wrongQuestions = [];
+
+            currentQuestions.forEach((q, index) => {
+                const userAnswer = userAnswers[index];
+                const correctAnswer = q.answer;
+
+                let isCorrect = false;
+
+                if (Array.isArray(userAnswer)) {
+                    const userAnswerStr = userAnswer.join(',');
+                    isCorrect = userAnswerStr === correctAnswer;
+                } else {
+                    isCorrect = userAnswer === correctAnswer;
+                }
+
+                if (isCorrect) {
+                    correctCount++;
+                } else {
+                    wrongQuestions.push({
+                        number: index + 1,
+                        question: q,
+                        userAnswer: Array.isArray(userAnswer) ? userAnswer.join(', ') : userAnswer || '未作答',
+                        correctAnswer: correctAnswer
+                    });
+                }
+            });
+
+            // 顯示結果
+            showResult(correctCount, currentQuestions.length, wrongQuestions);
+        }
+
+        // 顯示結果
+        function showResult(correctCount, totalCount, wrongQuestions) {
+            const percentage = Math.round((correctCount / totalCount) * 100);
+            const passed = percentage >= 60;
+
+            let resultHtml = `
+                <div class="result-card ${passed ? '' : 'fail'}">
+                    <h2>${passed ? '🎉 恭喜通過！' : '💪 繼續加油！'}</h2>
+                    <div class="score">${percentage}%</div>
+                    <p>答對 ${correctCount} 題，共 ${totalCount} 題</p>
+                </div>
+            `;
+
+            if (wrongQuestions.length > 0) {
+                resultHtml += '<div class="section-title">❌ 錯題分析</div>';
+                
+                wrongQuestions.forEach(wq => {
+                    resultHtml += `
+                        <div class="wrong-answer">
+                            <div class="question-number">第 ${wq.number} 題 [${wq.question.subject}]</div>
+                            <div class="question-text">${wq.question.question}</div>
+                            <div style="margin-top: 10px;">
+                                <strong>你的答案：</strong> ${wq.userAnswer}<br>
+                                <strong class="correct-answer">正確答案：${wq.correctAnswer}</strong>
+                            </div>
+                            ${wq.question.explanation ? `
+                                <div class="explanation">
+                                    <strong>💡 解析：</strong>${wq.question.explanation}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                resultHtml += '<div class="alert alert-info">🌟 全部答對！太厲害了！</div>';
+            }
+
+            document.getElementById('resultContent').innerHTML = resultHtml;
+            showPage('resultPage');
+        }
+
+        // 切換頁面
+        function showPage(pageId) {
+            document.getElementById('setupPage').classList.add('hidden');
+            document.getElementById('examPage').classList.add('hidden');
+            document.getElementById('resultPage').classList.add('hidden');
+            document.getElementById('loadingPage').classList.add('hidden');
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // 返回設定頁
+        function backToSetup() {
+            currentQuestions = [];
+            userAnswers = {};
+            showPage('setupPage');
+        }
+    </script>
+</body>
+</html>
